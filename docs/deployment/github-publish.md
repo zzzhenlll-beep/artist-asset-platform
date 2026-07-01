@@ -111,6 +111,14 @@ pnpm dev
 
 ## 一键脚本（注册并建库后）
 
+**方式 A（推荐，不受 PowerShell 脚本策略限制）：**
+
+```cmd
+scripts\publish-github.cmd zzzhenlll-beep
+```
+
+**方式 B（PowerShell 脚本）：**
+
 ```powershell
-powershell -File scripts\publish-github.ps1 -GitHubUser "你的用户名"
+powershell -ExecutionPolicy Bypass -File scripts\publish-github.ps1 -GitHubUser "你的用户名"
 ```
