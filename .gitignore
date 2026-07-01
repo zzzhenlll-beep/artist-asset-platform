@@ -1,0 +1,39 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# next
+/.next/
+/out/
+
+# env
+.env
+.env.local
+.env*.local
+
+# local uploads (runtime)
+storage/uploads/**
+!storage/uploads/.gitkeep
+
+# competition / office attachments (not source code)
+*.pptx
+*.xlsx
+*.docx
+
+# debug
+npm-debug.log*
+pnpm-debug.log*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.idea
+.vscode

@@ -1,0 +1,49 @@
+{
+  "name": "artist-asset-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node ./node_modules/next/dist/bin/next dev -H 0.0.0.0",
+    "build": "node ./node_modules/next/dist/bin/next build",
+    "start": "node ./node_modules/next/dist/bin/next start -H 0.0.0.0",
+    "lint": "node ./node_modules/next/dist/bin/next lint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:setup": "pnpm download:magritte-images && prisma db push && tsx prisma/seed.ts",
+    "download:magritte-images": "tsx scripts/download-magritte-images.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.9.0",
+    "clsx": "^2.1.1",
+    "jose": "^6.2.3",
+    "lucide-react": "^0.511.0",
+    "next": "^15.3.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwind-merge": "^3.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.8",
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "eslint": "^9.27.0",
+    "eslint-config-next": "^15.3.3",
+    "prisma": "^6.9.0",
+    "tailwindcss": "^4.1.8",
+    "tsx": "^4.22.4",
+    "typescript": "^5.8.3"
+  },
+  "trustedDependencies": [
+    "sharp",
+    "unrs-resolver",
+    "prisma",
+    "@prisma/client",
+    "@prisma/engines",
+    "esbuild"
+  ]
+}

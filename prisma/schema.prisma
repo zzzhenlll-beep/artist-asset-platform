@@ -1,0 +1,306 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  CREATOR
+  ADMIN
+}
+
+enum WorkStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum SaleStatus {
+  UNSOLD
+  SOLD
+  PRIVATE
+}
+
+enum IntentStatus {
+  PENDING
+  CONTACTED
+  CLOSED
+}
+
+enum ProcessAssetType {
+  SKETCH
+  NOTE
+  REFERENCE
+  STUDIO
+  EXPERIMENT
+  EXHIBITION_PREP
+}
+
+enum Visibility {
+  PUBLIC
+  SUPPORTERS
+  PRIVATE
+}
+
+enum TimelineEventType {
+  EXHIBITION
+  SERIES
+  MILESTONE
+  PUBLICATION
+  OTHER
+}
+
+enum ArchiveEntityType {
+  WORK
+  SERIES
+  PROCESS
+  PROFILE
+  TIMELINE
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Char(36)
+  phone     String   @unique @db.VarChar(20)
+  nickname  String?  @db.VarChar(64)
+  avatarUrl String?  @map("avatar_url") @db.VarChar(512)
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  creator   Creator?
+  favorites Favorite[]
+  follows   ArtistFollow[]
+  intents   CollaborationIntent[]
+  ratings   Rating[]
+
+  @@map("users")
+}
+
+model Creator {
+  id                String   @id @default(uuid()) @db.Char(36)
+  userId            String   @unique @map("user_id") @db.Char(36)
+  displayName       String?  @map("display_name") @db.VarChar(64)
+  city              String?  @db.VarChar(64)
+  medium            String?  @db.VarChar(128)
+  bio               String?  @db.Text
+  statement         String?  @db.Text
+  keywords          Json?
+  tags              Json?
+  socialLinks       Json?    @map("social_links")
+  openCollaboration Boolean  @default(true) @map("open_collaboration")
+  followerCount     Int      @default(0) @map("follower_count")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user            User              @relation(fields: [userId], references: [id])
+  works           Work[]
+  series          Series[]
+  timelineEvents  TimelineEvent[]
+  processAssets   ProcessAsset[]
+  followers       ArtistFollow[]
+  earlySupporters EarlySupporter[]
+  archiveLogs     ArchiveLog[]
+
+  @@map("creators")
+}
+
+model Series {
+  id              String   @id @default(uuid()) @db.Char(36)
+  creatorId       String   @map("creator_id") @db.Char(36)
+  title           String   @db.VarChar(200)
+  description     String?  @db.Text
+  themeEvolution  String?  @map("theme_evolution") @db.Text
+  startYear       Int?     @map("start_year")
+  endYear         Int?     @map("end_year")
+  coverUrl        String?  @map("cover_url") @db.VarChar(1024)
+  sortOrder       Int      @default(0) @map("sort_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  creator        Creator         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  works          Work[]
+  timelineEvents TimelineEvent[]
+  processAssets  ProcessAsset[]
+
+  @@index([creatorId])
+  @@map("series")
+}
+
+model Work {
+  id                  String     @id @default(uuid()) @db.Char(36)
+  creatorId           String     @map("creator_id") @db.Char(36)
+  seriesId            String?    @map("series_id") @db.Char(36)
+  title               String     @db.VarChar(200)
+  description         String?    @db.Text
+  year                Int?
+  dimensions          String?    @db.VarChar(128)
+  workMedium          String?    @map("work_medium") @db.VarChar(128)
+  saleStatus          SaleStatus @default(UNSOLD) @map("sale_status")
+  edition             String?    @db.VarChar(64)
+  openPresaleConsult  Boolean    @default(false) @map("open_presale_consult")
+  status              WorkStatus @default(DRAFT)
+  openCollaboration   Boolean    @default(true) @map("open_collaboration")
+  viewCount           Int        @default(0) @map("view_count")
+  favoriteCount       Int        @default(0) @map("favorite_count")
+  aiMeta              Json?      @map("ai_meta")
+  metadataHash        String?    @map("metadata_hash") @db.VarChar(64)
+  publishedAt         DateTime?  @map("published_at")
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
+
+  creator   Creator              @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  series    Series?              @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  media     WorkMedia[]
+  rating    Rating?
+  favorites Favorite[]
+  intents   CollaborationIntent[]
+
+  @@index([status, publishedAt])
+  @@index([creatorId])
+  @@index([seriesId])
+  @@map("works")
+}
+
+model WorkMedia {
+  id        String   @id @default(uuid()) @db.Char(36)
+  workId    String   @map("work_id") @db.Char(36)
+  url       String   @db.VarChar(1024)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  work Work @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@map("work_media")
+}
+
+model Rating {
+  id        String   @id @default(uuid()) @db.Char(36)
+  workId    String   @unique @map("work_id") @db.Char(36)
+  adminId   String   @map("admin_id") @db.Char(36)
+  score     Decimal  @db.Decimal(2, 1)
+  comment   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  work  Work @relation(fields: [workId], references: [id], onDelete: Cascade)
+  admin User @relation(fields: [adminId], references: [id])
+
+  @@map("ratings")
+}
+
+model Favorite {
+  id        String   @id @default(uuid()) @db.Char(36)
+  userId    String   @map("user_id") @db.Char(36)
+  workId    String   @map("work_id") @db.Char(36)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  work Work @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workId])
+  @@map("favorites")
+}
+
+model ArtistFollow {
+  id        String   @id @default(uuid()) @db.Char(36)
+  userId    String   @map("user_id") @db.Char(36)
+  creatorId String   @map("creator_id") @db.Char(36)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, creatorId])
+  @@map("artist_follows")
+}
+
+model EarlySupporter {
+  id        String   @id @default(uuid()) @db.Char(36)
+  creatorId String   @map("creator_id") @db.Char(36)
+  name      String   @db.VarChar(64)
+  note      String?  @db.VarChar(256)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId])
+  @@map("early_supporters")
+}
+
+model TimelineEvent {
+  id          String            @id @default(uuid()) @db.Char(36)
+  creatorId   String            @map("creator_id") @db.Char(36)
+  seriesId    String?           @map("series_id") @db.Char(36)
+  year        Int
+  month       Int?
+  title       String            @db.VarChar(200)
+  description String?           @db.Text
+  eventType   TimelineEventType @default(OTHER) @map("event_type")
+  sortOrder   Int               @default(0) @map("sort_order")
+  createdAt   DateTime          @default(now()) @map("created_at")
+
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  series  Series? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+
+  @@index([creatorId, year])
+  @@map("timeline_events")
+}
+
+model ProcessAsset {
+  id          String           @id @default(uuid()) @db.Char(36)
+  creatorId   String           @map("creator_id") @db.Char(36)
+  seriesId    String?          @map("series_id") @db.Char(36)
+  title       String           @db.VarChar(200)
+  description String?          @db.Text
+  assetType   ProcessAssetType @map("asset_type")
+  url         String           @db.VarChar(1024)
+  visibility  Visibility       @default(PUBLIC)
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  series  Series? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+
+  @@index([creatorId, visibility])
+  @@map("process_assets")
+}
+
+model ArchiveLog {
+  id          String            @id @default(uuid()) @db.Char(36)
+  creatorId   String            @map("creator_id") @db.Char(36)
+  entityType  ArchiveEntityType @map("entity_type")
+  entityId    String?           @map("entity_id") @db.Char(36)
+  action      String            @db.VarChar(64)
+  description String            @db.VarChar(512)
+  createdAt   DateTime          @default(now()) @map("created_at")
+
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId, createdAt])
+  @@map("archive_logs")
+}
+
+model CollaborationIntent {
+  id          String       @id @default(uuid()) @db.Char(36)
+  userId      String       @map("user_id") @db.Char(36)
+  creatorId   String?      @map("creator_id") @db.Char(36)
+  workId      String?      @map("work_id") @db.Char(36)
+  purpose     String       @db.Text
+  contactName String       @map("contact_name") @db.VarChar(64)
+  contactInfo String       @map("contact_info") @db.VarChar(128)
+  budgetRange String?      @map("budget_range") @db.VarChar(64)
+  message     String?      @db.Text
+  status      IntentStatus @default(PENDING)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  work Work? @relation(fields: [workId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@map("collaboration_intents")
+}

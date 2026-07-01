@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="55%" stop-color="#2d4a6f"/>
+      <stop offset="100%" stop-color="#c4b5a0"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f5f0e8"/>
+      <stop offset="100%" stop-color="#e8dfd0"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+  <rect x="96" y="90" width="1008" height="648" rx="4" fill="url(#frame)" opacity="0.92"/>
+  <circle cx="264" cy="252.00000000000003" r="81" fill="#1e3a5f" opacity="0.12"/>
+  <circle cx="936" cy="558" r="126.00000000000001" fill="#1e3a5f" opacity="0.08"/>
+  <rect x="216" y="342" width="768" height="36" fill="#1e3a5f" opacity="0.1" rx="2"/>
+  <rect x="288" y="432" width="624" height="27" fill="#1e3a5f" opacity="0.07" rx="2"/>
+  <text x="50%" y="648" text-anchor="middle" fill="#1e3a5f" font-family="Georgia, 'Times New Roman', serif" font-size="54" font-weight="400">形象的叛逆</text>
+  <text x="50%" y="702" text-anchor="middle" fill="#5a6b7d" font-family="system-ui, sans-serif" font-size="26" letter-spacing="0.12em">The Treachery of Images · 1929</text>
+</svg>
